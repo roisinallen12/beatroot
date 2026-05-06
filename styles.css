@@ -7,9 +7,40 @@
 
 /* ─── Phone Status Bar ──────────────────────────────────── */
 #phone-status-bar {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  height: auto;
+  height: 50px;
+  padding: 12px 20px 0;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.status-time {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--color-text-primary);
+  min-width: 40px;
+}
+
+.status-notch {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 34px;
+  background: #000;
+  border-radius: 20px;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-primary);
 }
 
 :root {
@@ -66,7 +97,7 @@ body {
   align-items: center;
   justify-content: space-between;
   height: var(--top-nav-height);
-  padding: 12px 10px 0;
+  padding: 0 10px;
   background-color: transparent;
   border-bottom: none;
   flex-shrink: 0;
