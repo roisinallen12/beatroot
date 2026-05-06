@@ -92,7 +92,7 @@ function bindLyricsView() {
 const topNavConfigs = {
   lyrics: {
     left:  `<button class="top-nav-btn" id="home-btn" aria-label="Home">${ICONS.home}</button>`,
-    right: `<div class="top-nav-right"><button class="top-nav-btn" aria-label="Theme"><span class="rainbow-dot"></span></button></div>`
+    right: `<div class="top-nav-right"><button class="top-nav-btn" aria-label="Add photo"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 4h6l1.5 2H20a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h2.5L10 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="13" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/><line x1="19" y1="7" x2="19" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="17.5" y1="8.5" x2="20.5" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>`
   },
   clips: {
     left:  `<span class="top-nav-title top-nav-title-large">Clips</span>`,
