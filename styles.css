@@ -11,8 +11,8 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 50px;
-  padding: 12px 20px 0;
+  height: 54px;
+  padding: 14px 20px 0;
   flex-shrink: 0;
   position: relative;
 }
@@ -28,10 +28,10 @@
 .status-notch {
   position: absolute;
   left: 50%;
-  top: 8px;
+  top: 6px;
   transform: translateX(-50%);
-  width: 120px;
-  height: 34px;
+  width: 126px;
+  height: 36px;
   background: #000;
   border-radius: 20px;
 }
