@@ -509,7 +509,7 @@ body {
 
 .clips-title {
   font-size: 32px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.6px;
 }
 
@@ -601,6 +601,286 @@ body {
 .clip-duration {
   font-size: 14px;
   color: var(--color-text-muted);
+}
+
+/* ─── Clip Expanded Overlay ─────────────────────────────── */
+.clip-expanded-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--safe-area-bottom);
+  background: #ffffff;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px var(--bottom-nav-height);
+  overflow: hidden;
+}
+/* Status bar sits at top, same as main app */
+.clip-exp-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 54px;
+  padding: 14px 0 0;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.clip-exp-status-time {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--color-text-primary);
+}
+
+.clip-exp-status-notch {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 36px;
+  background: #000;
+  border-radius: 20px;
+}
+
+.clip-exp-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-primary);
+}
+
+.clip-exp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+.clip-exp-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.3px;
+}
+
+.clip-exp-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clip-exp-more {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.clip-exp-more-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  /* Horizontal three dots */
+  transform: rotate(90deg);
+}
+
+.clip-exp-instrument {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 200px;
+  flex-shrink: 0;
+  margin: 16px 0 16px;
+}
+
+.clip-exp-glow {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(140, 220, 80, 0.65) 0%, rgba(140, 220, 80, 0.0) 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Three layered circles — no borders, fills only */
+.clip-exp-circle-outer {
+  width: 175px;
+  height: 175px;
+  border-radius: 50%;
+  background: #E4FED4;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.clip-exp-circle-mid {
+  width: 152px;
+  height: 152px;
+  border-radius: 50%;
+  background: #CFCFCF;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clip-exp-circle {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clip-exp-icon {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: invert(35%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(55%) contrast(90%);
+}
+
+/* Pulsing animation when playing */
+@keyframes clip-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.clip-exp-instrument.is-playing .clip-exp-circle-outer {
+  animation: clip-pulse 1.2s ease-in-out infinite;
+}
+
+.clip-exp-instrument.is-playing .clip-exp-glow {
+  animation: clip-pulse 1.2s ease-in-out infinite;
+}
+
+.clip-exp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  margin: 12px 0 8px;
+}
+
+.clip-exp-ctrl-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clip-exp-waveform-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 80px;
+  background: transparent;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+/* Waveform — bars start at playhead and extend right */
+.clip-exp-waveform {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 8px;
+  overflow: hidden;
+}
+
+.clip-exp-waveform span {
+  flex: 0 0 2.5px;
+  border-radius: 2px;
+  background: #555;
+  opacity: 0.75;
+}
+
+.clip-exp-scrubber-col {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.clip-exp-scrubber-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #555;
+  flex-shrink: 0;
+}
+
+.clip-exp-scrubber-line {
+  flex: 1;
+  width: 1.5px;
+  background: #555;
+}
+
+.clip-exp-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 0 4px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+
+/* Bottom nav — absolutely positioned at bottom of overlay */
+.clip-exp-bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background: #fff;
+}
+
+.clip-exp-bottom-nav #clip-exp-bottom-nav-el {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  height: 100%;
+  padding: 0 4px;
+  background: transparent;
+  border: none;
 }
 
 /* ─── Record View ────────────────────────────────────────── */

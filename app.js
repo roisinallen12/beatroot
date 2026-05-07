@@ -572,9 +572,142 @@ function buildExpandedPreviewContents(container, clip, options) {
     }
   });
   controls.appendChild(playBtn);
-  controls.appendChild(makeIconBtn(ICONS.expand, 'Expand', null));
+  controls.appendChild(makeIconBtn(ICONS.expand, 'Expand', () => openClipExpanded(clip)));
 
   container.appendChild(controls);
+}
+
+// ─── Clip Expanded View ───────────────────────────────────────────────────────
+
+function openClipExpanded(clip) {
+  stopClipAudio();
+
+  // Store which clip was expanded so we can restore state on close
+  appState.selectedClipId = clip.id;
+
+  const app = document.getElementById('app');
+
+  // Build overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'clip-expanded-overlay';
+  overlay.className = 'clip-expanded-overlay';
+
+  // Generate waveform bars matching recording view style
+  const barCount = 50;
+  const bars = Array.from({ length: barCount }, () => {
+    const h = 10 + Math.random() * 80;
+    return `<span style="height:${h}%"></span>`;
+  }).join('');
+
+  const sectionCount = appState.sections.filter(s =>
+    s && s.clipIds && s.clipIds.includes(clip.id)
+  ).length;
+
+  overlay.innerHTML = `
+    <div class="clip-exp-status-bar">
+      <span class="clip-exp-status-time">9:41</span>
+      <span class="clip-exp-status-notch"></span>
+      <span class="clip-exp-status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="0.5" fill="currentColor"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="0.5" fill="currentColor"/><rect x="9" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 9.5a1.2 1.2 0 110 2.4A1.2 1.2 0 018 9.5z" fill="currentColor"/><path d="M4.5 7C5.7 5.8 6.8 5.2 8 5.2s2.3.6 3.5 1.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/><path d="M1.8 4.3C3.7 2.4 5.7 1.4 8 1.4s4.3 1 6.2 2.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" opacity="0.4"/></svg>
+      </span>
+    </div>
+    <div class="clip-exp-header">
+      <span class="clip-exp-title">${clip.name}</span>
+      <button class="clip-exp-close" id="clip-exp-close-btn" aria-label="Close">${ICONS.close}</button>
+    </div>
+    <div class="clip-exp-more">
+      <button class="clip-exp-more-btn" aria-label="More">${ICONS.moreVertical}</button>
+    </div>
+    <div class="clip-exp-instrument" id="clip-exp-instrument">
+      <div class="clip-exp-glow"></div>
+      <div class="clip-exp-circle-outer">
+        <div class="clip-exp-circle-mid">
+          <div class="clip-exp-circle">
+            <img src="assets/images/grand-piano.png" alt="Instrument" class="clip-exp-icon" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="clip-exp-controls">
+      <button class="clip-exp-ctrl-btn" aria-label="Add to Song" id="clip-exp-add-btn"><img src="assets/images/sections-icon.png" width="28" height="28" alt="Add to Song" /></button>
+      <button class="clip-exp-ctrl-btn" aria-label="Play" id="clip-exp-play-btn"><img src="assets/images/play-icon.png" width="28" height="28" alt="Play" /></button>
+      <button class="clip-exp-ctrl-btn" aria-label="Loop" id="clip-exp-loop-btn"><img src="assets/images/loop-icon.png" width="28" height="28" alt="Loop" /></button>
+    </div>
+    <div class="clip-exp-waveform-wrap">
+      <div class="clip-exp-scrubber-col">
+        <div class="clip-exp-scrubber-dot"></div>
+        <div class="clip-exp-scrubber-line"></div>
+        <div class="clip-exp-scrubber-dot"></div>
+      </div>
+      <div class="clip-exp-waveform waveform">${bars}</div>
+    </div>
+    <div class="clip-exp-meta">
+      <span>In ${sectionCount} section${sectionCount !== 1 ? 's' : ''}</span>
+      <span>${formatMmSs(clip.durationMs)}</span>
+    </div>
+    <div class="clip-exp-bottom-nav" id="clip-exp-nav"></div>
+  `;
+
+  app.appendChild(overlay);
+
+  // Clone the bottom nav into the overlay so it appears identical
+  const bottomNav = document.getElementById('bottom-nav');
+  const navClone = bottomNav.cloneNode(true);
+  navClone.id = 'clip-exp-bottom-nav-el';
+  document.getElementById('clip-exp-nav').appendChild(navClone);
+
+  // Wire up cloned nav buttons to close overlay and navigate
+  navClone.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      stopClipAudio();
+      const overlay = document.getElementById('clip-expanded-overlay');
+      if (overlay) overlay.remove();
+      const view = btn.getAttribute('data-view');
+      loadView(view);
+    });
+  });
+
+  // Close button — return to clips with this clip expanded
+  document.getElementById('clip-exp-close-btn').addEventListener('click', () => {
+    closeClipExpanded(clip);
+  });
+
+  // Play button
+  const playBtn = document.getElementById('clip-exp-play-btn');
+  const instrument = document.getElementById('clip-exp-instrument');
+  let isPlaying = false;
+
+  playBtn.addEventListener('click', () => {
+    const playImg = playBtn.querySelector('img');
+    if (isPlaying) {
+      stopClipAudio();
+      playImg.src = 'assets/images/play-icon.png';
+      instrument.classList.remove('is-playing');
+      isPlaying = false;
+    } else {
+      playClipAudio(clip);
+      playImg.src = 'assets/images/play-icon.png'; // keep same icon, pulse shows state
+      instrument.classList.add('is-playing');
+      isPlaying = true;
+      if (_currentAudio) {
+        _currentAudio.onended = () => {
+          instrument.classList.remove('is-playing');
+          isPlaying = false;
+        };
+      }
+    }
+  });
+}
+
+function closeClipExpanded(clip) {
+  stopClipAudio();
+  const overlay = document.getElementById('clip-expanded-overlay');
+  if (overlay) overlay.remove();
+  // Restore clips view with this clip expanded
+  appState.expandedPreviewClipId = clip.id;
+  renderClipsView();
 }
 
 function createSectionShell() {
