@@ -52,6 +52,67 @@ const appState = {
   }
 };
 
+// ─── Clip Audio Pool ──────────────────────────────────────────────────────────
+const AUDIO_POOL = [
+  'assets/musicClips/clip1-bg.mp3',
+  'assets/musicClips/clip1-violin.mp3',
+  'assets/musicClips/clip2-guitar.mp3',
+  'assets/musicClips/clip2-piano.mp3',
+];
+
+// Clip assignment index — advances each time a clip is created
+let _audioAssignmentIndex = 0;
+
+function assignAudioToClip(clip) {
+  clip.audioFile = AUDIO_POOL[_audioAssignmentIndex % AUDIO_POOL.length];
+  _audioAssignmentIndex++;
+}
+
+// Recording audio — separate instance, separate index, never shared with clip playback
+let _recordingAudio = null;
+let _recordingAudioIndex = 0;
+
+function playRecordingAudio() {
+  if (_recordingAudio) {
+    _recordingAudio.pause();
+    _recordingAudio.currentTime = 0;
+  }
+  const src = AUDIO_POOL[_recordingAudioIndex % AUDIO_POOL.length];
+  _recordingAudioIndex++;
+  _recordingAudio = new Audio(src);
+  _recordingAudio.play();
+}
+
+function stopRecordingAudio() {
+  if (_recordingAudio) {
+    _recordingAudio.pause();
+    _recordingAudio.currentTime = 0;
+    _recordingAudio = null;
+  }
+}
+
+// Clip playback audio — separate instance, always starts from beginning
+let _currentAudio = null;
+
+function playClipAudio(clip) {
+  const src = clip.audioFile;
+  if (!src) return;
+  if (_currentAudio) {
+    _currentAudio.pause();
+    _currentAudio.currentTime = 0;
+  }
+  _currentAudio = new Audio(src);
+  _currentAudio.play();
+}
+
+function stopClipAudio() {
+  if (_currentAudio) {
+    _currentAudio.pause();
+    _currentAudio.currentTime = 0;
+    _currentAudio = null;
+  }
+}
+
 function normaliseTitle(title) {
   const trimmed = String(title || '').trim();
   return trimmed.length ? trimmed : 'New Song';
@@ -309,7 +370,7 @@ function createClipsFromStoppedRecording() {
 
   const nextClips = [];
   const fullClipId = createId('clip');
-  nextClips.push({
+  const fullClip = {
     id: fullClipId,
     sessionId,
     kind: 'full',
@@ -321,14 +382,16 @@ function createClipsFromStoppedRecording() {
     isNew: true,
     isActive: false,
     source: 'recording'
-  });
+  };
+  assignAudioToClip(fullClip);
+  nextClips.push(fullClip);
 
   for (let i = 0; i < bookmarks.length; i++) {
     const b = bookmarks[i];
     const startMs = Math.max(0, Math.floor(Math.min(b.startMs, b.endMs)));
     const endMs = Math.max(0, Math.floor(Math.max(b.startMs, b.endMs)));
     const durationMs = Math.max(0, endMs - startMs);
-    nextClips.push({
+    const bookmarkClip = {
       id: createId('clip'),
       sessionId,
       kind: 'bookmark',
@@ -341,7 +404,9 @@ function createClipsFromStoppedRecording() {
       isNew: true,
       isActive: false,
       source: 'bookmark'
-    });
+    };
+    assignAudioToClip(bookmarkClip);
+    nextClips.push(bookmarkClip);
   }
 
   for (let i = 0; i < appState.clips.length; i++) {
@@ -452,7 +517,29 @@ function buildExpandedPreviewContents(container, clip, options) {
   };
 
   controls.appendChild(makeIconBtn(ICONS.sections, 'Add to Song', opts.onAddToSong));
-  controls.appendChild(makeIconBtn(ICONS.play, 'Play', null));
+
+  // Play button — plays/stops the mapped audio for this clip
+  const playBtn = makeIconBtn(ICONS.play, 'Play', null);
+  let isPlaying = false;
+  playBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isPlaying) {
+      stopClipAudio();
+      playBtn.innerHTML = ICONS.play;
+      isPlaying = false;
+    } else {
+      playClipAudio(clip);
+      playBtn.innerHTML = ICONS.stop;
+      isPlaying = true;
+      if (_currentAudio) {
+        _currentAudio.onended = () => {
+          playBtn.innerHTML = ICONS.play;
+          isPlaying = false;
+        };
+      }
+    }
+  });
+  controls.appendChild(playBtn);
   controls.appendChild(makeIconBtn(ICONS.expand, 'Expand', null));
 
   container.appendChild(controls);
@@ -1076,6 +1163,7 @@ function renderClipsView() {
     }
 
     row.addEventListener('click', () => {
+      stopClipAudio();
       appState.expandedPreviewClipId = isExpanded ? null : clip.id;
       renderClipsView();
     });
@@ -1146,6 +1234,7 @@ function stopFakeRecordingSession() {
   }
 
   appState.recordingSession.isRecording = false;
+  stopRecordingAudio();
 }
 
 function startFakeRecordingSession() {
@@ -1158,6 +1247,9 @@ function startFakeRecordingSession() {
   appState.recordingSession.activeBookmarkStartMs = null;
   appState.tempBookmarks = [];
   setRecordDomRulerVisible(false);
+
+  // Play audio to simulate recording
+  playRecordingAudio();
 
   ensureBookmarkDebugUi();
   updateBookmarkDebugCount();
