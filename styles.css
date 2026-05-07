@@ -234,7 +234,7 @@ body {
   background-color: transparent;
   border-top: none;
   flex-shrink: 0;
-  padding: 0 10px;
+  padding: 0 4px;
 }
 
 .nav-item {
@@ -247,34 +247,32 @@ body {
   cursor: pointer;
   height: 100%;
   padding: 0;
+  color: var(--color-text-primary);
 }
 
 .nav-pill {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 7px 12px;
-  border-radius: 20px;
-  color: var(--color-inactive);
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 16px;
+  color: inherit;
   transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.nav-item.active .nav-pill {
-  background-color: rgba(255, 255, 255, 0.68);
-  width: 66px;
-  height: 66px;
-  padding: 0;
-  gap: 3px;
-  border-radius: 18px;
+.nav-item.active {
   color: var(--color-text-primary);
-  justify-content: center;
-  text-align: center;
+}
+
+.nav-item.active .nav-pill {
+  background-color: #f0f0f2;
+  padding: 10px 14px;
+  border-radius: 16px;
   box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.10),
-    0 0 0 1px rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
@@ -288,9 +286,10 @@ body {
 }
 
 .nav-label {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 510;
   letter-spacing: 0.1px;
+  line-height: 1;
 }
 
 /* ─── Record Button ─────────────────────────────────────── */
@@ -390,7 +389,7 @@ body {
 
 /* ─── Lyrics View ────────────────────────────────────────── */
 .lyrics-view {
-  background-color: #FFFFF9;
+  background-color: #ffffff;
   min-height: 100%;
 }
 
@@ -427,23 +426,39 @@ body {
   overflow: hidden;
   appearance: none;
   -webkit-appearance: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 2;
+  letter-spacing: -0.031em;
+  color: var(--color-text-muted);
 }
 
 .lyrics-view textarea.lyrics-body::placeholder {
   color: var(--color-text-muted);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 2;
+  letter-spacing: -0.031em;
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
+  letter-spacing: 0.4px;
+  line-height: 41px;
   margin-bottom: 8px;
   color: var(--color-text-primary);
 }
 
 .page-subtitle {
-  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 2;
+  letter-spacing: -0.031em;
   color: var(--color-text-muted);
-  line-height: 1.5;
 }
 
 .btn-pill {
