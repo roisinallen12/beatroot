@@ -153,7 +153,7 @@ function bindLyricsView() {
 const topNavConfigs = {
   lyrics: {
     left:  `<button class="top-nav-btn" id="home-btn" aria-label="Home">${ICONS.home}</button>`,
-    right: `<div class="top-nav-right"><button class="top-nav-btn" aria-label="Add photo"><img src="assets/images/camera-sm.png" alt="" width="26" height="26" /></button></div>`
+    right: `<div class="top-nav-right"><button class="top-nav-btn" id="camera-btn" aria-label="Add photo"><img src="assets/images/camera-sm.png" alt="" width="26" height="26" /></button></div>`
   },
   clips: {
     left:  `<span class="top-nav-title top-nav-title-large">Clips</span>`,
@@ -178,6 +178,41 @@ function updateTopNav(viewName) {
   const config = topNavConfigs[viewName] || topNavConfigs.lyrics;
   topNav.innerHTML = config.left + config.right;
   bindExportModal();
+  if (viewName === 'lyrics') bindCameraPopover();
+}
+
+function bindCameraPopover() {
+  const btn = document.getElementById('camera-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const existing = document.getElementById('camera-popover');
+    if (existing) { existing.remove(); return; }
+
+    const popover = document.createElement('div');
+    popover.id = 'camera-popover';
+    popover.innerHTML = `
+      <img src="assets/images/add-cover-image.png" alt="Upload Cover Image" />
+    `;
+
+    // Position below camera button
+    const app = document.getElementById('app');
+    app.appendChild(popover);
+
+    const btnRect = btn.getBoundingClientRect();
+    const appRect = app.getBoundingClientRect();
+    popover.style.top = (btnRect.bottom - appRect.top - 48) + 'px';
+    popover.style.right = '12px';
+
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', function handler() {
+        popover.remove();
+        document.removeEventListener('click', handler);
+      });
+    }, 0);
+  });
 }
 
 // ─── Navigation ─────────────────────────────────────────────────────────────
@@ -441,11 +476,8 @@ function buildExpandedPreviewContents(container, clip, options) {
 
   if (clip.isNew) {
     const tag = document.createElement('span');
-    tag.textContent = 'NEW';
-    tag.style.marginLeft = '8px';
-    tag.style.fontSize = '11px';
-    tag.style.fontWeight = '700';
-    tag.style.color = 'rgba(28, 28, 30, 0.55)';
+    tag.textContent = 'new';
+    tag.className = 'clip-tag-new';
     name.appendChild(tag);
   }
 
@@ -1146,11 +1178,8 @@ function renderClipsView() {
 
       if (clip.isNew) {
         const tag = document.createElement('span');
-        tag.textContent = 'NEW';
-        tag.style.marginLeft = '8px';
-        tag.style.fontSize = '11px';
-        tag.style.fontWeight = '700';
-        tag.style.color = 'rgba(28, 28, 30, 0.55)';
+        tag.textContent = 'new';
+        tag.className = 'clip-tag-new';
         name.appendChild(tag);
       }
 
